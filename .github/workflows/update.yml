@@ -34,9 +34,12 @@ jobs:
       - name: Update weather
         run: python weather.py
         continue-on-error: true
+      - name: Update fund positioning
+        run: python positioning.py
+        continue-on-error: true
       - name: Save changes
         run: |
           git config user.name "github-actions"
           git config user.email "actions@github.com"
-          git add data.json reactions.json heatmap.json alerts.json weather.json
+          git add data.json reactions.json heatmap.json alerts.json weather.json positioning.json
           git diff --staged --quiet || (git commit -m "Update storage data" && git push)
