@@ -27,6 +27,11 @@ h1{font-size:1.5rem;font-weight:800;margin:0 0 4px}h2{font-size:1.05rem;font-wei
 .seg button.bull[aria-pressed=true]{border-color:var(--bull);box-shadow:inset 0 0 0 1px var(--bull);color:var(--bull)}
 .seg button.bear[aria-pressed=true]{border-color:var(--bear);box-shadow:inset 0 0 0 1px var(--bear);color:var(--bear)}
 .big{font-size:1.15rem;font-weight:800}
+table{width:100%;border-collapse:collapse;font-size:.85rem;font-variant-numeric:tabular-nums}
+th,td{padding:6px;border-bottom:1px solid var(--line);text-align:right;white-space:nowrap}
+th:first-child,td:first-child{text-align:left}
+th{font-weight:600;color:var(--mute)}
+.up{color:var(--bull)}.dn{color:var(--bear)}
 </style>
 </head>
 <body>
@@ -59,6 +64,16 @@ h1{font-size:1.5rem;font-weight:800;margin:0 0 4px}h2{font-size:1.05rem;font-wei
       <button class="bull" data-b="Bullish" aria-pressed="false">Bullish</button>
     </div>
     <p id="bias-note" class="mute" style="margin-top:10px"></p>
+  </section>
+
+  <section class="panel">
+    <h2>Did price agree with the bias?</h2>
+    <p class="mute" id="score">Waiting for the first price check.</p>
+    <div style="overflow-x:auto"><table id="rx" hidden>
+      <thead><tr><th>Released</th><th>Bias</th><th>5 min</th><th>15 min</th><th>60 min</th><th>Swing</th><th>Match</th></tr></thead>
+      <tbody></tbody>
+    </table></div>
+    <p class="mute" style="margin-top:8px">Moves are in percent, measured from the moment of release on US natural gas futures. Swing is the high to low range in the first 30 minutes. Reports come once a week, so wait for 15 or more rows before trusting the score.</p>
   </section>
 
   <section class="panel">
@@ -128,6 +143,23 @@ h1{font-size:1.5rem;font-weight:800;margin:0 0 4px}h2{font-size:1.05rem;font-wei
   }
   function load(){fetch('data.json?'+Date.now()).then(function(r){return r.json()}).then(function(d){render(d.latest)}).catch(function(){})}
   load();setInterval(load,300000);
+  function loadRx(){fetch('reactions.json?'+Date.now()).then(function(r){return r.json()}).then(function(d){
+    var rows=d.rows||[];if(!rows.length)return;
+    var tb=document.querySelector('#rx tbody');tb.textContent='';
+    rows.slice().reverse().slice(0,12).forEach(function(r){
+      var tr=document.createElement('tr');
+      function cell(t,c){var td=document.createElement('td');td.textContent=t;if(c)td.className=c;tr.appendChild(td)}
+      function mv(v){return v===null?'-':(v>0?'+':'')+v+'%'}
+      function cl(v){return v>0?'up':v<0?'dn':''}
+      cell(r.released);cell(r.bias);cell(mv(r.m5),cl(r.m5));cell(mv(r.m15),cl(r.m15));cell(mv(r.m60),cl(r.m60));cell(r.swing+'%');
+      cell(r.match===true?'Yes':r.match===false?'No':'-');
+      tb.appendChild(tr);
+    });
+    document.getElementById('rx').hidden=false;
+    var sc=rows.filter(function(r){return r.match!==null}),ok=sc.filter(function(r){return r.match}).length;
+    document.getElementById('score').textContent=sc.length?'Bias matched the 15 minute price move in '+ok+' of '+sc.length+' scored reports. Neutral reports are not scored.':'No scored reports yet. Neutral reports are not scored.';
+  }).catch(function(){})}
+  loadRx();setInterval(loadRx,300000);
 })();
 </script>
 </body>
