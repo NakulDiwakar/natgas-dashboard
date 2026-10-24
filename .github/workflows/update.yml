@@ -17,9 +17,12 @@ jobs:
       - name: Check price reaction
         run: python price_reaction.py
         continue-on-error: true
+      - name: Build hours heatmap
+        run: python hours_heatmap.py
+        continue-on-error: true
       - name: Save changes
         run: |
           git config user.name "github-actions"
           git config user.email "actions@github.com"
-          git add data.json reactions.json
+          git add data.json reactions.json heatmap.json
           git diff --staged --quiet || (git commit -m "Update storage data" && git push)
