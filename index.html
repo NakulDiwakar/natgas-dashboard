@@ -87,6 +87,17 @@ th{font-weight:600;color:var(--mute)}
   </section>
 
   <section class="panel">
+    <h2>US weather, next 7 days</h2>
+    <p class="big" id="wx-head">Waiting for the first weather check.</p>
+    <p class="mute" id="wx-note"></p>
+    <div style="overflow-x:auto"><table id="wx" hidden>
+      <thead><tr><th>City</th><th>Forecast</th><th>Normal</th><th>Difference</th></tr></thead>
+      <tbody></tbody>
+    </table></div>
+    <p class="mute" style="margin-top:8px">Average daily temperature in degrees Celsius, compared with the same week in the last 5 years. Refreshed once a day.</p>
+  </section>
+
+  <section class="panel">
     <h2>Live headlines</h2>
     <p class="mute">Coming in the next step.</p>
   </section>
@@ -190,6 +201,20 @@ th{font-weight:600;color:var(--mute)}
     document.getElementById('hm-note').textContent=best?'Biggest average swing: '+best.d+' at '+tlabel(best.t)+' ('+best.v.toFixed(2)+'%).':'';
   }).catch(function(){})}
   loadHm();
+  function loadWx(){fetch('weather.json?'+Date.now()).then(function(r){return r.json()}).then(function(d){
+    if(!d.rows||!d.rows.length)return;
+    var dv=d.diff,ab=Math.abs(dv).toFixed(1),dir=dv<0?'colder':'warmer';
+    var head=d.lean==='Neutral'?(d.season==='mild'?'Weather is not a big driver now':'Close to normal weather'):(d.lean+' lean: '+ab+'°C '+dir+' than normal');
+    document.getElementById('wx-head').textContent=head;
+    document.getElementById('wx-note').textContent=d.season==='heating'?'Heating season: colder than normal raises gas demand, milder lowers it.':d.season==='cooling'?'Cooling season: hotter than normal raises power demand and gas use, cooler lowers it.':'Spring and autumn: heating and cooling needs are low, so treat weather as background.';
+    var tb=document.querySelector('#wx tbody');tb.textContent='';
+    d.rows.forEach(function(r){var tr=document.createElement('tr');
+      function cell(t,c){var td=document.createElement('td');td.textContent=t;if(c)td.className=c;tr.appendChild(td)}
+      cell(r.name);cell(r.forecast+'°');cell(r.normal+'°');cell((r.diff>0?'+':'')+r.diff+'°');
+      tb.appendChild(tr)});
+    document.getElementById('wx').hidden=false;
+  }).catch(function(){})}
+  loadWx();
 })();
 </script>
 </body>
