@@ -1,1 +1,15 @@
-{"rows": []}
+{
+ "rows": [
+  {
+   "week": "2026-10-16",
+   "released": "2026-10-22",
+   "bias": "Neutral",
+   "basis": "level",
+   "m5": 0.07,
+   "m15": 0.39,
+   "m60": 0.25,
+   "swing": 1.68,
+   "match": null
+  }
+ ]
+}
