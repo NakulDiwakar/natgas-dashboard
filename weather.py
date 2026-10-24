@@ -1,5 +1,5 @@
 # Compares the next 7 days of weather in big US gas-heating cities with the last 5 years
-import json, os, urllib.request
+import json, os, time, urllib.request
 from datetime import date, datetime, timedelta, timezone
 
 CITIES = [("New York", 40.71, -74.01), ("Chicago", 41.88, -87.63), ("Boston", 42.36, -71.06),
@@ -7,9 +7,20 @@ CITIES = [("New York", 40.71, -74.01), ("Chicago", 41.88, -87.63), ("Boston", 42
 DAYS = 7
 
 def get(url):
-    req = urllib.request.Request(url, headers={"User-Agent": "natgas-dashboard"})
-    with urllib.request.urlopen(req, timeout=30) as r:
-        return json.load(r)
+    # Try up to 4 times with a pause, because free services sometimes time out
+    last = None
+    for attempt in range(4):
+        try:
+            req = urllib.request.Request(url, headers={"User-Agent": "natgas-dashboard"})
+            with urllib.request.urlopen(req, timeout=60) as r:
+                data = json.load(r)
+            time.sleep(1)
+            return data
+        except Exception as e:
+            last = e
+            print("Retrying after error:", e)
+            time.sleep(5 * (attempt + 1))
+    raise last
 
 def mean(xs):
     xs = [x for x in xs if x is not None]
@@ -27,6 +38,7 @@ def main():
     today = date.today()
     rows = []
     for name, lat, lon in CITIES:
+      try:
         f = get("https://api.open-meteo.com/v1/forecast?latitude=%s&longitude=%s"
                 "&daily=temperature_2m_mean&forecast_days=%d&timezone=auto" % (lat, lon, DAYS))
         forecast = mean(f["daily"]["temperature_2m_mean"])
@@ -43,7 +55,12 @@ def main():
         normal = mean(past)
         rows.append({"name": name, "forecast": round(forecast, 1), "normal": round(normal, 1),
                      "diff": round(forecast - normal, 1)})
+      except Exception as e:
+        print("Skipping", name, "because of:", e)
 
+    if len(rows) < 3:
+        print("Too few cities worked, not saving.")
+        return
     diff = round(mean([r["diff"] for r in rows]), 1)
     m = today.month
     if m in (11, 12, 1, 2, 3):
