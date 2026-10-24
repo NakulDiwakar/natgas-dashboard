@@ -98,6 +98,15 @@ th{font-weight:600;color:var(--mute)}
   </section>
 
   <section class="panel">
+    <h2>What big funds are doing</h2>
+    <p class="big" id="pos-head">Waiting for the first positioning check.</p>
+    <div class="bar" style="background:linear-gradient(90deg,var(--bull),var(--line) 50%,var(--bear))"><div class="pin" id="pos-pin"></div></div>
+    <div class="ends"><span>Crowded short</span><span>Balanced</span><span>Crowded long</span></div>
+    <p class="mute" id="pos-note" style="margin-top:10px"></p>
+    <p class="mute">Source: the US regulator’s weekly report on large speculators (managed money) in natural gas futures. It covers Tuesday’s positions and comes out on Friday evening India time. Very crowded positions can reverse sharply, but this is background, not a timing signal.</p>
+  </section>
+
+  <section class="panel">
     <h2>Live headlines</h2>
     <p class="mute">Coming in the next step.</p>
   </section>
@@ -215,6 +224,14 @@ th{font-weight:600;color:var(--mute)}
     document.getElementById('wx').hidden=false;
   }).catch(function(){})}
   loadWx();
+  function loadPos(){fetch('positioning.json?'+Date.now()).then(function(r){return r.json()}).then(function(d){
+    if(!d.state)return;
+    document.getElementById('pos-head').textContent=d.state;
+    document.getElementById('pos-pin').style.left=d.percentile+'%';
+    var n=function(v){return Math.abs(v).toLocaleString('en-US')};
+    document.getElementById('pos-note').textContent='Funds are net '+(d.net>=0?'long ':'short ')+n(d.net)+' contracts ('+Math.abs(d.net_pct)+'% of open interest), as of '+d.report_date+'. That is more bullish than in '+d.percentile+'% of the last '+Math.round(d.weeks/52*10)/10+' years. Change in a week: '+(d.change>=0?'+':'-')+n(d.change)+' contracts.';
+  }).catch(function(){})}
+  loadPos();
 })();
 </script>
 </body>
