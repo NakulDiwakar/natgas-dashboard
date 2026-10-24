@@ -1,1 +1,1 @@
-{"updated": null, "rows": []}
+{"updated": "2026-10-24T19:36:38.150302+00:00", "season": "mild", "diff": 0.9, "lean": "Neutral", "rows": [{"name": "New York", "forecast": 12.7, "normal": 13.2, "diff": -0.5}, {"name": "Chicago", "forecast": 15.4, "normal": 11.6, "diff": 3.8}, {"name": "Boston", "forecast": 9.9, "normal": 11.3, "diff": -1.5}, {"name": "Philadelphia", "forecast": 13.0, "normal": 13.7, "diff": -0.7}, {"name": "Detroit", "forecast": 14.2, "normal": 11.0, "diff": 3.2}]}
