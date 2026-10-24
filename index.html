@@ -31,6 +31,7 @@ table{width:100%;border-collapse:collapse;font-size:.85rem;font-variant-numeric:
 th,td{padding:6px;border-bottom:1px solid var(--line);text-align:right;white-space:nowrap}
 th:first-child,td:first-child{text-align:left}
 th{font-weight:600;color:var(--mute)}
+.hm td,.hm th{text-align:center;padding:4px 2px}.hm td:first-child,.hm th:first-child{text-align:left;white-space:nowrap}
 .up{color:var(--bull)}.dn{color:var(--bear)}
 </style>
 </head>
@@ -74,6 +75,15 @@ th{font-weight:600;color:var(--mute)}
       <tbody></tbody>
     </table></div>
     <p class="mute" style="margin-top:8px">Moves are in percent, measured from the moment of release on US natural gas futures. Swing is the high to low range in the first 30 minutes. Reports come once a week, so wait for 15 or more rows before trusting the score.</p>
+  </section>
+
+  <section class="panel">
+    <h2>When does gas move most?</h2>
+    <p class="mute" id="hm-note">Waiting for the first weekly build.</p>
+    <div style="overflow-x:auto"><table class="hm" id="hm" hidden>
+      <thead></thead><tbody></tbody>
+    </table></div>
+    <p class="mute" style="margin-top:8px">Average high to low range of each hour, in percent, over the last year, shown in India time for today’s US clock setting. Darker means a bigger move. It shows how much price moves, not which way. Rebuilt about once a week.</p>
   </section>
 
   <section class="panel">
@@ -160,6 +170,26 @@ th{font-weight:600;color:var(--mute)}
     document.getElementById('score').textContent=sc.length?'Bias matched the 15 minute price move in '+ok+' of '+sc.length+' scored reports. Neutral reports are not scored.':'No scored reports yet. Neutral reports are not scored.';
   }).catch(function(){})}
   loadRx();setInterval(loadRx,300000);
+  function tlabel(t){var h=+t.slice(0,2),m=t.slice(3);return (h%12||12)+':'+m+(h<12?' AM':' PM')}
+  function loadHm(){fetch('heatmap.json?'+Date.now()).then(function(r){return r.json()}).then(function(d){
+    if(!d.rows||!d.rows.length)return;
+    var all=[];d.rows.forEach(function(r){r.vals.forEach(function(v){if(v!==null)all.push(v)})});
+    var mx=Math.max.apply(null,all),th=document.querySelector('#hm thead'),tb=document.querySelector('#hm tbody');
+    th.textContent='';tb.textContent='';
+    var hr=document.createElement('tr'),c0=document.createElement('th');c0.textContent='India time';hr.appendChild(c0);
+    d.days.forEach(function(x){var c=document.createElement('th');c.textContent=x;hr.appendChild(c)});th.appendChild(hr);
+    d.rows.forEach(function(r){
+      var tr=document.createElement('tr'),a=document.createElement('td');a.textContent=tlabel(r.time);tr.appendChild(a);
+      r.vals.forEach(function(v){var c=document.createElement('td');
+        if(v===null){c.textContent='-'}else{c.textContent=v.toFixed(2);c.style.background='color-mix(in srgb, var(--flame) '+Math.round(v/mx*85)+'%, transparent)'}
+        tr.appendChild(c)});
+      tb.appendChild(tr);
+    });
+    document.getElementById('hm').hidden=false;
+    var best=null;d.rows.forEach(function(r){r.vals.forEach(function(v,i){if(v!==null&&(!best||v>best.v))best={v:v,t:r.time,d:d.days[i]}})});
+    document.getElementById('hm-note').textContent=best?'Biggest average swing: '+best.d+' at '+tlabel(best.t)+' ('+best.v.toFixed(2)+'%).':'';
+  }).catch(function(){})}
+  loadHm();
 })();
 </script>
 </body>
