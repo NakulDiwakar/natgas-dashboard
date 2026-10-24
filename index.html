@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Natural gas event dashboard</title>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;600;800&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#f3f6f8;--panel:#fff;--ink:#12202b;--mute:#5b6b78;--line:#d5dee5;--flame:#0a6fb5;--bull:#17924f;--bear:#cf3a3a;--warn:#b86a00;color-scheme:light}
+@media (prefers-color-scheme:dark){:root{--bg:#0c151c;--panel:#142029;--ink:#e8f0f5;--mute:#8fa3b2;--line:#27384a;--flame:#4db3ff;--bull:#3fcf84;--bear:#ff6b6b;--warn:#ffb54d;color-scheme:dark}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:'Archivo',system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;line-height:1.5;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+main{max-width:640px;margin:0 auto;padding:20px 16px 40px}
+h1{font-size:1.5rem;font-weight:800;margin:0 0 4px}h2{font-size:1.05rem;font-weight:600;margin:0 0 10px}p{margin:0 0 8px}
+.mute{color:var(--mute);font-size:.9rem}
+.panel{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:16px;margin-top:14px}
+.count{font-size:clamp(2rem,9vw,3rem);font-weight:800;letter-spacing:-.02em;color:var(--flame);font-variant-numeric:tabular-nums}
+.banner{margin-top:10px;padding:10px 12px;border-radius:10px;border:1px solid var(--line);font-size:.92rem}
+.banner.hot{border-color:var(--warn);color:var(--warn);font-weight:600}
+.bar{position:relative;height:16px;border-radius:8px;margin:18px 0 6px;background:linear-gradient(90deg,var(--bear),var(--line) 50%,var(--bull))}
+.pin{position:absolute;top:-6px;width:6px;height:28px;border-radius:3px;background:var(--ink);left:50%;transform:translateX(-50%);transition:left .35s}
+.ends{display:flex;justify-content:space-between;font-size:.8rem;color:var(--mute)}
+.seg{display:flex;gap:8px;margin-top:8px}
+.seg button{flex:1;padding:11px 8px;border-radius:10px;border:1px solid var(--line);background:var(--bg);color:var(--ink);font:inherit;font-weight:600;cursor:pointer}
+.seg button:focus-visible{outline:2px solid var(--flame);outline-offset:2px}
+.seg button[aria-pressed=true]{border-color:var(--flame);box-shadow:inset 0 0 0 1px var(--flame)}
+.seg button.bull[aria-pressed=true]{border-color:var(--bull);box-shadow:inset 0 0 0 1px var(--bull);color:var(--bull)}
+.seg button.bear[aria-pressed=true]{border-color:var(--bear);box-shadow:inset 0 0 0 1px var(--bear);color:var(--bear)}
+.big{font-size:1.15rem;font-weight:800}
+</style>
+</head>
+<body>
+<main>
+  <h1>Natural gas event dashboard</h1>
+  <p class="mute">Fills itself from the official US storage report. No typing needed.</p>
+
+  <section class="panel">
+    <h2>Next US gas storage report</h2>
+    <div class="count" id="count">--</div>
+    <p id="when" class="mute"></p>
+    <div class="banner" id="banner"></div>
+  </section>
+
+  <section class="panel">
+    <h2>Latest report vs normal</h2>
+    <div class="bar"><div class="pin" id="pin"></div></div>
+    <div class="ends"><span>Bearish</span><span>Neutral</span><span>Bullish</span></div>
+    <p class="big" id="verdict" style="margin-top:12px">Waiting for the first report</p>
+    <p class="mute" id="explain"></p>
+    <p class="mute" id="stamp"></p>
+  </section>
+
+  <section class="panel">
+    <h2>News bias to set in your indicator</h2>
+    <p class="mute">Set automatically from the latest report. Tap to override it.</p>
+    <div class="seg" role="group" aria-label="News bias">
+      <button class="bear" data-b="Bearish" aria-pressed="false">Bearish</button>
+      <button data-b="Neutral" aria-pressed="true">Neutral</button>
+      <button class="bull" data-b="Bullish" aria-pressed="false">Bullish</button>
+    </div>
+    <p id="bias-note" class="mute" style="margin-top:10px"></p>
+  </section>
+
+  <section class="panel">
+    <h2>Live headlines</h2>
+    <p class="mute">Coming in the next step.</p>
+  </section>
+
+  <p class="mute" style="margin-top:16px">The report comes out at 10:30 AM New York time, so the India time moves by one hour when US clocks change. In holiday weeks the release can shift a day. The normal level is EIA’s five-year average, which is a weaker stand-in for what analysts expected. The 1 hour before and 2 hours after window is a rule of thumb we will test later.</p>
+</main>
+<script>
+(function(){
+  var el=function(id){return document.getElementById(id)};
+  function nyParts(d){var o={};new Intl.DateTimeFormat('en-US',{timeZone:'America/New_York',year:'numeric',month:'numeric',day:'numeric',hour:'numeric',minute:'numeric',hour12:false,weekday:'short'}).formatToParts(d).forEach(function(x){o[x.type]=x.value});return o;}
+  function nextReport(now){
+    for(var i=0;i<10;i++){
+      var o=nyParts(new Date(now.getTime()+i*864e5)),y=+o.year,m=+o.month-1,d=+o.day;
+      for(var k=0;k<2;k++){
+        var t=new Date(Date.UTC(y,m,d,14+k,30)),q=nyParts(t);
+        if(q.weekday==='Thu'&&+q.hour===10&&+q.minute===30&&+q.day===d&&t.getTime()>now.getTime()-3*36e5)return t;
+      }
+    }
+    return null;
+  }
+  function tick(){
+    var now=new Date(),t=nextReport(now);
+    if(!t){el('count').textContent='--';return;}
+    var diff=t-now,b=el('banner');
+    el('when').textContent=t.toLocaleString('en-IN',{timeZone:'Asia/Kolkata',weekday:'long',day:'numeric',month:'short',hour:'numeric',minute:'2-digit',hour12:true})+' India time';
+    if(diff>0){
+      var s=Math.floor(diff/1000),dd=Math.floor(s/86400),h=Math.floor(s%86400/3600),m=Math.floor(s%3600/60),sec=s%60;
+      el('count').textContent=(dd?dd+'d ':'')+h+'h '+m+'m '+String(sec).padStart(2,'0')+'s';
+      if(diff<36e5){b.className='banner hot';b.textContent='Report is under 1 hour away. Price can jump either way, so zone trades are riskier now.';}
+      else{b.className='banner';b.textContent='No event pressure right now. Trade your 75 and 125 minute zones as usual.';}
+    }else{
+      el('count').textContent='Just released';
+      b.className='banner hot';b.textContent='Report is out. Take care with zone trades for about 2 hours.';
+    }
+  }
+  tick();setInterval(tick,1000);
+
+  var manual=false;
+  function setBias(v,fromUser){
+    if(fromUser)manual=true;
+    document.querySelectorAll('.seg button').forEach(function(x){x.setAttribute('aria-pressed',x.dataset.b===v?'true':'false')});
+    el('bias-note').textContent=v==='Neutral'?'Bias is Neutral: trade your zones as usual.':v==='Bullish'?'Bias is Bullish: demand zones (buys) have extra support, be choosy with supply zones.':'Bias is Bearish: supply zones (sells) have extra support, be choosy with demand zones.';
+  }
+  document.querySelectorAll('.seg button').forEach(function(x){x.addEventListener('click',function(){setBias(x.dataset.b,true)})});
+  setBias('Neutral',false);
+
+  function sign(n){return (n>0?'+':'')+n}
+  function render(L){
+    if(!L){return;}
+    var pos=50,ex;
+    if(L.basis==='weekly'){
+      pos=50+Math.max(-15,Math.min(15,L.surprise))/15*50;
+      ex='Reported change '+sign(L.net_change)+' Bcf, normal for this week '+sign(L.normal_change)+' Bcf. '+(L.surprise>0?'Less gas was added than normal, which usually supports price.':L.surprise<0?'More gas was added than normal, which usually weighs on price.':'Right on normal.');
+      el('verdict').textContent=L.bias+': '+Math.abs(L.surprise)+' Bcf '+(L.surprise>=0?'below':'above')+' normal build';
+    }else{
+      pos=50+Math.max(-6,Math.min(6,-L.level_vs_normal_pct))/6*50;
+      ex='Storage is '+Math.abs(L.level_vs_normal_pct)+'% '+(L.level_vs_normal_pct<0?'below':'above')+' the five-year average. The weekly comparison starts with the next report.';
+      el('verdict').textContent=L.bias+' lean from storage level';
+    }
+    el('pin').style.left=pos+'%';
+    el('explain').textContent=ex;
+    el('stamp').textContent='Report for week ending '+L.week+', released '+L.released+'.';
+    if(!manual)setBias(L.bias,false);
+  }
+  function load(){fetch('data.json?'+Date.now()).then(function(r){return r.json()}).then(function(d){render(d.latest)}).catch(function(){})}
+  load();setInterval(load,300000);
+})();
+</script>
+</body>
+</html>
