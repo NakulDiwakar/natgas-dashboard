@@ -1,10 +1,14 @@
 name: Update storage data
 on:
   schedule:
-    - cron: "*/10 14-17 * * 3-5"
+    - cron: "*/5 14-16 * * 4"
+    - cron: "*/15 14-17 * * 3,5"
   workflow_dispatch:
 permissions:
   contents: write
+concurrency:
+  group: update-storage
+  cancel-in-progress: false
 jobs:
   update:
     runs-on: ubuntu-latest
@@ -14,6 +18,12 @@ jobs:
         with:
           python-version: "3.12"
       - run: python fetch_storage.py
+      - name: Send Telegram alerts
+        run: python telegram_alerts.py
+        continue-on-error: true
+        env:
+          TELEGRAM_TOKEN: ${{ secrets.TELEGRAM_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
       - name: Check price reaction
         run: python price_reaction.py
         continue-on-error: true
@@ -24,5 +34,5 @@ jobs:
         run: |
           git config user.name "github-actions"
           git config user.email "actions@github.com"
-          git add data.json reactions.json heatmap.json
+          git add data.json reactions.json heatmap.json alerts.json
           git diff --staged --quiet || (git commit -m "Update storage data" && git push)
