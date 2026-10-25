@@ -100,10 +100,11 @@ th{font-weight:600;color:var(--mute)}
   <section class="panel">
     <h2>What big funds are doing</h2>
     <p class="big" id="pos-head">Waiting for the first positioning check.</p>
-    <div class="bar" style="background:linear-gradient(90deg,var(--bull),var(--line) 50%,var(--bear))"><div class="pin" id="pos-pin"></div></div>
-    <div class="ends"><span>Crowded short</span><span>Balanced</span><span>Crowded long</span></div>
-    <p class="mute" id="pos-note" style="margin-top:10px"></p>
-    <p class="mute">Source: the US regulator’s weekly report on large speculators (managed money) in natural gas futures. It covers Tuesday’s positions and comes out on Friday evening India time. Very crowded positions can reverse sharply, but this is background, not a timing signal.</p>
+    <div class="bar" style="background:linear-gradient(90deg,var(--bear),var(--line) 50%,var(--bull))"><div class="pin" id="pos-pin"></div></div>
+    <div class="ends"><span>Betting on a fall</span><span>Evenly split</span><span>Betting on a rise</span></div>
+    <p id="pos-meaning" style="margin-top:12px"></p>
+    <p class="mute" id="pos-note"></p>
+    <p class="mute">This shows what large investment funds are betting on natural gas, from the US regulator’s weekly report. It covers Tuesday and is published on Friday evening India time. Treat it as background, not a signal to buy or sell.</p>
   </section>
 
   <section class="panel">
@@ -237,10 +238,24 @@ th{font-weight:600;color:var(--mute)}
   loadWx();
   function loadPos(){fetch('positioning.json?'+Date.now()).then(function(r){return r.json()}).then(function(d){
     if(!d.state)return;
-    document.getElementById('pos-head').textContent=d.state;
-    document.getElementById('pos-pin').style.left=d.percentile+'%';
-    var n=function(v){return Math.abs(v).toLocaleString('en-US')};
-    document.getElementById('pos-note').textContent='Funds are net '+(d.net>=0?'long ':'short ')+n(d.net)+' contracts ('+Math.abs(d.net_pct)+'% of open interest), as of '+d.report_date+'. That is more bullish than in '+d.percentile+'% of the last '+Math.round(d.weeks/52*10)/10+' years. Change in a week: '+(d.change>=0?'+':'-')+n(d.change)+' contracts.';
+    var p=d.percentile,yrs=Math.round(d.weeks/52*10)/10,n=function(v){return Math.abs(v).toLocaleString('en-US')};
+    var head,mean;
+    if(p<=10){head='Big funds are betting heavily on a price fall';mean='Almost everyone who wanted to bet on a fall has already done so. That can mean much of the fall has already happened. If the price starts to rise, these funds may rush to close their bets, which can push the price up quickly. This does not mean the price will rise now.';}
+    else if(p<=35){head='Big funds lean towards betting on a fall';mean='More of them expect the price to fall than to rise, but not to an extreme.';}
+    else if(p<65){head='Big funds are fairly evenly split';mean='There is no strong lean either way, so this adds little to your picture.';}
+    else if(p<90){head='Big funds lean towards betting on a rise';mean='More of them expect the price to rise than to fall, but not to an extreme.';}
+    else{head='Big funds are betting heavily on a price rise';mean='Almost everyone who wanted to bet on a rise has already done so. That can mean much of the rise has already happened. If the price starts to fall, these funds may rush to sell, which can push the price down quickly. This does not mean the price will fall now.';}
+    document.getElementById('pos-head').textContent=head;
+    document.getElementById('pos-meaning').textContent=mean;
+    document.getElementById('pos-pin').style.left=p+'%';
+    var t=[];
+    t.push('In total, funds are betting on a '+(d.net<0?'fall':'rise')+' by '+n(d.net)+' contracts, which is '+Math.abs(d.net_pct)+'% of all open bets.');
+    if(p<=35)t.push('Funds have been this pessimistic, or more, in only about '+p+' out of every 100 weeks over the last '+yrs+' years.');
+    else if(p>=65)t.push('Funds have been this optimistic, or more, in only about '+(100-p)+' out of every 100 weeks over the last '+yrs+' years.');
+    else t.push('This is about normal for the last '+yrs+' years.');
+    t.push(d.change<0?'Since last week they added about '+n(d.change)+' more contracts betting on a fall.':d.change>0?'Since last week they added about '+n(d.change)+' more contracts betting on a rise.':'No change since last week.');
+    t.push('Figures are as of '+d.report_date+'.');
+    document.getElementById('pos-note').textContent=t.join(' ');
   }).catch(function(){})}
   loadPos();
   function loadBt(){fetch('backtest.json?'+Date.now()).then(function(r){return r.json()}).then(function(d){
