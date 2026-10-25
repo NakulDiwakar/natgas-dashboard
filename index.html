@@ -107,6 +107,17 @@ th{font-weight:600;color:var(--mute)}
   </section>
 
   <section class="panel">
+    <h2>Past test: did the bias work?</h2>
+    <p class="big" id="bt-head">Waiting for the first test run.</p>
+    <div style="overflow-x:auto"><table id="bt" hidden>
+      <thead><tr><th>Group</th><th>Reports</th><th>Right after 1 hour</th><th>Right after 2 hours</th><th>Avg move with bias</th></tr></thead>
+      <tbody></tbody>
+    </table></div>
+    <p class="mute" id="bt-note" style="margin-top:8px"></p>
+    <p class="mute">Each report is scored by whether price moved the way the bias said, from 10:00 AM New York time (30 minutes before the release) to one or two hours later. That includes some drift before the release, so treat it as a rough test. The bracket is a 95% range: if it still includes 50%, the result cannot be told apart from a coin flip.</p>
+  </section>
+
+  <section class="panel">
     <h2>Live headlines</h2>
     <p class="mute">Coming in the next step.</p>
   </section>
@@ -232,6 +243,25 @@ th{font-weight:600;color:var(--mute)}
     document.getElementById('pos-note').textContent='Funds are net '+(d.net>=0?'long ':'short ')+n(d.net)+' contracts ('+Math.abs(d.net_pct)+'% of open interest), as of '+d.report_date+'. That is more bullish than in '+d.percentile+'% of the last '+Math.round(d.weeks/52*10)/10+' years. Change in a week: '+(d.change>=0?'+':'-')+n(d.change)+' contracts.';
   }).catch(function(){})}
   loadPos();
+  function loadBt(){fetch('backtest.json?'+Date.now()).then(function(r){return r.json()}).then(function(d){
+    if(!d.groups)return;
+    var tb=document.querySelector('#bt tbody');tb.textContent='';
+    function rt(x){return x.p+'% ('+x.lo+'-'+x.hi+'%)'}
+    d.groups.forEach(function(g){var tr=document.createElement('tr');
+      function cell(t){var td=document.createElement('td');td.textContent=t;tr.appendChild(td)}
+      cell(g.name);cell(g.n);
+      if(g.n){cell(rt(g.h1));cell(rt(g.h2));cell((g.avg>0?'+':'')+g.avg+'%')}else{cell('-');cell('-');cell('-')}
+      tb.appendChild(tr)});
+    document.getElementById('bt').hidden=false;
+    var g=d.groups[0],v;
+    if(g.n<30)v='Only '+g.n+' scored reports so far, too few to tell.';
+    else if(g.h1.lo>50)v='Better than a coin flip over '+d.reports+' reports.';
+    else if(g.h1.hi<50)v='Worse than a coin flip: price tended to go the other way.';
+    else v='Not clearly different from a coin flip.';
+    document.getElementById('bt-head').textContent=v;
+    document.getElementById('bt-note').textContent='Reports from '+d.first+' to '+d.last+' ('+d.reports+' in total). Price rose in '+d.up_rate+'% of all of them in the first hour, which is the baseline to beat.';
+  }).catch(function(){})}
+  loadBt();
 })();
 </script>
 </body>
