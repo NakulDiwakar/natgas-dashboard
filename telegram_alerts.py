@@ -51,14 +51,15 @@ def main():
     if L and (L["week"] + "-bias") not in sent:
         updated = datetime.strptime(L["updated_utc"], "%Y-%m-%d %H:%M").replace(tzinfo=timezone.utc)
         if (now - updated).total_seconds() < 3 * 3600:
-            lines = ["Gas storage report is out. Bias: " + L["bias"] + "."]
+            lean = {"Bullish": "leaning up", "Bearish": "leaning down"}.get(L["bias"], "no clear lean")
+            lines = ["US gas stock report is out. Overall: " + lean + "."]
             if L["basis"] == "weekly":
-                more = "less" if L["surprise"] > 0 else "more"
-                lines.append("Reported {:+g} Bcf, normal for this week {:+g} Bcf ({} gas added than normal).".format(
-                    L["net_change"], L["normal_change"], more))
+                def chg(v):
+                    return ("rose by " if v >= 0 else "fell by ") + str(abs(round(v))) + " billion cubic feet"
+                lines.append("Gas in storage " + chg(L["net_change"]) + ". A normal week at this time of year: " + chg(L["normal_change"]) + ".")
             else:
                 d = L["level_vs_normal_pct"]
-                lines.append("Storage is " + str(abs(d)) + "% " + ("below" if d < 0 else "above") + " the five-year average.")
+                lines.append("US gas storage is " + str(abs(d)) + "% " + ("below" if d < 0 else "above") + " the five-year average.")
             lines.append("Expect wild swings for about 2 hours.")
             send("\n".join(lines))
         sent.append(L["week"] + "-bias")
