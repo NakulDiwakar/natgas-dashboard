@@ -1,0 +1,28 @@
+name: Backtest storage bias
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "0 4 1 * *"
+permissions:
+  contents: write
+concurrency:
+  group: update-storage
+  cancel-in-progress: false
+jobs:
+  backtest:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Run backtest
+        run: python backtest.py
+        env:
+          EIA_API_KEY: ${{ secrets.EIA_API_KEY }}
+      - name: Save changes
+        run: |
+          git config user.name "github-actions"
+          git config user.email "actions@github.com"
+          git add backtest.json
+          git diff --staged --quiet || (git commit -m "Update backtest" && git push)
