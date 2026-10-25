@@ -38,43 +38,44 @@ th{font-weight:600;color:var(--mute)}
 <body>
 <main>
   <h1>Natural gas event dashboard</h1>
-  <p class="mute">Fills itself from the official US storage report. No typing needed.</p>
+  <p class="mute">Updates itself every week. Nothing to type.</p>
 
   <section class="panel">
-    <h2>Next US gas storage report</h2>
+    <h2>Next US gas stock report</h2>
+    <p class="mute">Every Thursday the US government reports how much natural gas is in storage. Prices often jump when it comes out.</p>
     <div class="count" id="count">--</div>
     <p id="when" class="mute"></p>
     <div class="banner" id="banner"></div>
   </section>
 
   <section class="panel">
-    <h2>Latest report vs normal</h2>
+    <h2>Latest report: more or less gas than usual?</h2>
     <div class="bar"><div class="pin" id="pin"></div></div>
-    <div class="ends"><span>Bearish</span><span>Neutral</span><span>Bullish</span></div>
+    <div class="ends"><span>Leaning down</span><span>Normal</span><span>Leaning up</span></div>
     <p class="big" id="verdict" style="margin-top:12px">Waiting for the first report</p>
     <p class="mute" id="explain"></p>
     <p class="mute" id="stamp"></p>
   </section>
 
   <section class="panel">
-    <h2>News bias to set in your indicator</h2>
-    <p class="mute">Set automatically from the latest report. Tap to override it.</p>
-    <div class="seg" role="group" aria-label="News bias">
-      <button class="bear" data-b="Bearish" aria-pressed="false">Bearish</button>
-      <button data-b="Neutral" aria-pressed="true">Neutral</button>
-      <button class="bull" data-b="Bullish" aria-pressed="false">Bullish</button>
+    <h2>Overall lean from this report</h2>
+    <p class="mute">Picked automatically. Tap another one if you disagree.</p>
+    <div class="seg" role="group" aria-label="Overall lean">
+      <button class="bear" data-b="Bearish" aria-pressed="false">Leaning down</button>
+      <button data-b="Neutral" aria-pressed="true">No clear lean</button>
+      <button class="bull" data-b="Bullish" aria-pressed="false">Leaning up</button>
     </div>
     <p id="bias-note" class="mute" style="margin-top:10px"></p>
   </section>
 
   <section class="panel">
-    <h2>Did price agree with the bias?</h2>
+    <h2>After each report: did price move that way?</h2>
     <p class="mute" id="score">Waiting for the first price check.</p>
     <div style="overflow-x:auto"><table id="rx" hidden>
-      <thead><tr><th>Released</th><th>Bias</th><th>5 min</th><th>15 min</th><th>60 min</th><th>Swing</th><th>Match</th></tr></thead>
+      <thead><tr><th>Date</th><th>Report said</th><th>5 min</th><th>15 min</th><th>60 min</th><th>Total range</th><th>Agreed?</th></tr></thead>
       <tbody></tbody>
     </table></div>
-    <p class="mute" style="margin-top:8px">Moves are in percent, measured from the moment of release on US natural gas futures. Swing is the high to low range in the first 30 minutes. Reports come once a week, so wait for 15 or more rows before trusting the score.</p>
+    <p class="mute" style="margin-top:8px">Moves are in percent, measured from the moment the report came out, on US natural gas futures. “Total range” is the gap between the highest and lowest price in the first 30 minutes. Reports come once a week, so wait for 15 or more rows before trusting the score.</p>
   </section>
 
   <section class="panel">
@@ -83,7 +84,7 @@ th{font-weight:600;color:var(--mute)}
     <div style="overflow-x:auto"><table class="hm" id="hm" hidden>
       <thead></thead><tbody></tbody>
     </table></div>
-    <p class="mute" style="margin-top:8px">Average high to low range of each hour, in percent, over the last year, shown in India time for today’s US clock setting. Darker means a bigger move. It shows how much price moves, not which way. Rebuilt about once a week.</p>
+    <p class="mute" style="margin-top:8px">Each box shows how far price usually travels in that hour (from lowest to highest, in percent), over the last year, in India time for today’s US clock setting. Darker means bigger moves. It shows how much price moves, not which way. Updated about once a week.</p>
   </section>
 
   <section class="panel">
@@ -108,14 +109,14 @@ th{font-weight:600;color:var(--mute)}
   </section>
 
   <section class="panel">
-    <h2>Past test: did the bias work?</h2>
+    <h2>Looking back: would the weekly lean have worked?</h2>
     <p class="big" id="bt-head">Waiting for the first test run.</p>
     <div style="overflow-x:auto"><table id="bt" hidden>
-      <thead><tr><th>Group</th><th>Reports</th><th>Right after 1 hour</th><th>Right after 2 hours</th><th>Avg move with bias</th></tr></thead>
+      <thead><tr><th>Type of report</th><th>Reports</th><th>Price moved that way after 1 hour</th><th>after 2 hours</th><th>Average move in that direction</th></tr></thead>
       <tbody></tbody>
     </table></div>
     <p class="mute" id="bt-note" style="margin-top:8px"></p>
-    <p class="mute">Each report is scored by whether price moved the way the bias said, from 10:00 AM New York time (30 minutes before the release) to one or two hours later. That includes some drift before the release, so treat it as a rough test. The bracket is a 95% range: if it still includes 50%, the result cannot be told apart from a coin flip.</p>
+    <p class="mute">Each report is checked by whether price moved the way the lean said, from 10:00 AM New York time (30 minutes before the report) to one or two hours later. That includes a little movement before the report, so treat it as a rough test. The brackets show how much a result could vary by chance. If a bracket includes 50%, the result cannot be told apart from guessing.</p>
   </section>
 
   <section class="panel">
@@ -123,11 +124,14 @@ th{font-weight:600;color:var(--mute)}
     <p class="mute">Coming in the next step.</p>
   </section>
 
-  <p class="mute" style="margin-top:16px">The report comes out at 10:30 AM New York time, so the India time moves by one hour when US clocks change. In holiday weeks the release can shift a day. The normal level is EIA’s five-year average, which is a weaker stand-in for what analysts expected. The 1 hour before and 2 hours after window is a rule of thumb we will test later.</p>
+  <p class="mute" style="margin-top:16px">The report comes out at 10:30 AM New York time, so India time moves by one hour when US clocks change. In holiday weeks the date can shift. “Normal” means the average of the last five years, which is only a rough stand-in for what analysts expected. The warning window (1 hour before to 2 hours after) is a rule of thumb that we will test later.</p>
 </main>
 <script>
 (function(){
   var el=function(id){return document.getElementById(id)};
+  function leanTxt(b){return b==='Bullish'?'Leaning up':b==='Bearish'?'Leaning down':'No clear lean'}
+  function leanShort(b){return b==='Bullish'?'Up':b==='Bearish'?'Down':'No lean'}
+  function gname(n){return n==='All scored reports'?'All reports with a lean':n==='Bullish bias'?'Leaning up':n==='Bearish bias'?'Leaning down':n==='Large surprise (7+ Bcf)'?'Big differences (7+ billion cubic feet)':n}
   function nyParts(d){var o={};new Intl.DateTimeFormat('en-US',{timeZone:'America/New_York',year:'numeric',month:'numeric',day:'numeric',hour:'numeric',minute:'numeric',hour12:false,weekday:'short'}).formatToParts(d).forEach(function(x){o[x.type]=x.value});return o;}
   function nextReport(now){
     for(var i=0;i<10;i++){
@@ -147,11 +151,11 @@ th{font-weight:600;color:var(--mute)}
     if(diff>0){
       var s=Math.floor(diff/1000),dd=Math.floor(s/86400),h=Math.floor(s%86400/3600),m=Math.floor(s%3600/60),sec=s%60;
       el('count').textContent=(dd?dd+'d ':'')+h+'h '+m+'m '+String(sec).padStart(2,'0')+'s';
-      if(diff<36e5){b.className='banner hot';b.textContent='Report is under 1 hour away. Price can jump either way, so zone trades are riskier now.';}
-      else{b.className='banner';b.textContent='No event pressure right now. Trade your 75 and 125 minute zones as usual.';}
+      if(diff<36e5){b.className='banner hot';b.textContent='The report comes out within the hour. Price can jump either way, so be careful with new trades.';}
+      else{b.className='banner';b.textContent='Quiet period. Trade your 75 and 125 minute zones as usual.';}
     }else{
       el('count').textContent='Just released';
-      b.className='banner hot';b.textContent='Report is out. Take care with zone trades for about 2 hours.';
+      b.className='banner hot';b.textContent='The report is out. Be careful with new trades for about 2 hours.';
     }
   }
   tick();setInterval(tick,1000);
@@ -160,7 +164,7 @@ th{font-weight:600;color:var(--mute)}
   function setBias(v,fromUser){
     if(fromUser)manual=true;
     document.querySelectorAll('.seg button').forEach(function(x){x.setAttribute('aria-pressed',x.dataset.b===v?'true':'false')});
-    el('bias-note').textContent=v==='Neutral'?'Bias is Neutral: trade your zones as usual.':v==='Bullish'?'Bias is Bullish: demand zones (buys) have extra support, be choosy with supply zones.':'Bias is Bearish: supply zones (sells) have extra support, be choosy with demand zones.';
+    el('bias-note').textContent=v==='Neutral'?'No clear lean: trade your zones as usual.':v==='Bullish'?'Leaning up: buy zones (demand) get a little extra support. Be pickier with sell zones (supply).':'Leaning down: sell zones (supply) get a little extra support. Be pickier with buy zones (demand).';
   }
   document.querySelectorAll('.seg button').forEach(function(x){x.addEventListener('click',function(){setBias(x.dataset.b,true)})});
   setBias('Neutral',false);
@@ -171,16 +175,17 @@ th{font-weight:600;color:var(--mute)}
     var pos=50,ex;
     if(L.basis==='weekly'){
       pos=50+Math.max(-15,Math.min(15,L.surprise))/15*50;
-      ex='Reported change '+sign(L.net_change)+' Bcf, normal for this week '+sign(L.normal_change)+' Bcf. '+(L.surprise>0?'Less gas was added than normal, which usually supports price.':L.surprise<0?'More gas was added than normal, which usually weighs on price.':'Right on normal.');
-      el('verdict').textContent=L.bias+': '+Math.abs(L.surprise)+' Bcf '+(L.surprise>=0?'below':'above')+' normal build';
+      var chg=function(v){return (v>=0?'rose by ':'fell by ')+Math.abs(v)+' billion cubic feet'};
+      ex='Gas in US storage '+chg(L.net_change)+' last week. In a normal week at this time of year it '+chg(L.normal_change)+'. '+(L.surprise>0?'So less gas was added than usual, which tends to support the price.':L.surprise<0?'So more gas was added than usual, which tends to weigh on the price.':'So it is right on normal.');
+      el('verdict').textContent=L.bias==='Neutral'?'About the usual amount of gas added':(L.surprise>0?'Less gas added than usual':'More gas added than usual')+' ('+Math.abs(L.surprise)+' billion cubic feet '+(L.surprise>0?'less':'more')+')';
     }else{
       pos=50+Math.max(-6,Math.min(6,-L.level_vs_normal_pct))/6*50;
-      ex='Storage is '+Math.abs(L.level_vs_normal_pct)+'% '+(L.level_vs_normal_pct<0?'below':'above')+' the five-year average. The weekly comparison starts with the next report.';
-      el('verdict').textContent=L.bias+' lean from storage level';
+      ex='US gas storage is '+Math.abs(L.level_vs_normal_pct)+'% '+(L.level_vs_normal_pct<0?'below':'above')+' the five-year average. The week-to-week comparison starts with the next report.';
+      el('verdict').textContent=leanTxt(L.bias)+', based on how full storage is';
     }
     el('pin').style.left=pos+'%';
     el('explain').textContent=ex;
-    el('stamp').textContent='Report for week ending '+L.week+', released '+L.released+'.';
+    el('stamp').textContent='Report for the week ending '+L.week+', published '+L.released+'.';
     if(!manual)setBias(L.bias,false);
   }
   function load(){fetch('data.json?'+Date.now()).then(function(r){return r.json()}).then(function(d){render(d.latest)}).catch(function(){})}
@@ -193,13 +198,13 @@ th{font-weight:600;color:var(--mute)}
       function cell(t,c){var td=document.createElement('td');td.textContent=t;if(c)td.className=c;tr.appendChild(td)}
       function mv(v){return v===null?'-':(v>0?'+':'')+v+'%'}
       function cl(v){return v>0?'up':v<0?'dn':''}
-      cell(r.released);cell(r.bias);cell(mv(r.m5),cl(r.m5));cell(mv(r.m15),cl(r.m15));cell(mv(r.m60),cl(r.m60));cell(r.swing+'%');
+      cell(r.released);cell(leanShort(r.bias));cell(mv(r.m5),cl(r.m5));cell(mv(r.m15),cl(r.m15));cell(mv(r.m60),cl(r.m60));cell(r.swing+'%');
       cell(r.match===true?'Yes':r.match===false?'No':'-');
       tb.appendChild(tr);
     });
     document.getElementById('rx').hidden=false;
     var sc=rows.filter(function(r){return r.match!==null}),ok=sc.filter(function(r){return r.match}).length;
-    document.getElementById('score').textContent=sc.length?'Bias matched the 15 minute price move in '+ok+' of '+sc.length+' scored reports. Neutral reports are not scored.':'No scored reports yet. Neutral reports are not scored.';
+    document.getElementById('score').textContent=sc.length?'The report’s lean matched the price move after 15 minutes in '+ok+' of '+sc.length+' reports. Reports with no clear lean are not counted.':'No reports with a clear lean yet. Reports with no clear lean are not counted.';
   }).catch(function(){})}
   loadRx();setInterval(loadRx,300000);
   function tlabel(t){var h=+t.slice(0,2),m=t.slice(3);return (h%12||12)+':'+m+(h<12?' AM':' PM')}
@@ -219,13 +224,13 @@ th{font-weight:600;color:var(--mute)}
     });
     document.getElementById('hm').hidden=false;
     var best=null;d.rows.forEach(function(r){r.vals.forEach(function(v,i){if(v!==null&&(!best||v>best.v))best={v:v,t:r.time,d:d.days[i]}})});
-    document.getElementById('hm-note').textContent=best?'Biggest average swing: '+best.d+' at '+tlabel(best.t)+' ('+best.v.toFixed(2)+'%).':'';
+    document.getElementById('hm-note').textContent=best?'Busiest time: '+best.d+' at '+tlabel(best.t)+' (price moves about '+best.v.toFixed(2)+'% in that hour on average).':'';
   }).catch(function(){})}
   loadHm();
   function loadWx(){fetch('weather.json?'+Date.now()).then(function(r){return r.json()}).then(function(d){
     if(!d.rows||!d.rows.length)return;
     var dv=d.diff,ab=Math.abs(dv).toFixed(1),dir=dv<0?'colder':'warmer';
-    var head=d.lean==='Neutral'?(d.season==='mild'?'Weather is not a big driver now':'Close to normal weather'):(d.lean+' lean: '+ab+'°C '+dir+' than normal');
+    var head=d.lean==='Neutral'?(d.season==='mild'?'Weather is not a big driver now':'Close to normal weather'):(leanTxt(d.lean)+': '+ab+'°C '+dir+' than normal');
     document.getElementById('wx-head').textContent=head;
     document.getElementById('wx-note').textContent=d.season==='heating'?'Heating season: colder than normal raises gas demand, milder lowers it.':d.season==='cooling'?'Cooling season: hotter than normal raises power demand and gas use, cooler lowers it.':'Spring and autumn: heating and cooling needs are low, so treat weather as background.';
     var tb=document.querySelector('#wx tbody');tb.textContent='';
@@ -264,17 +269,17 @@ th{font-weight:600;color:var(--mute)}
     function rt(x){return x.p+'% ('+x.lo+'-'+x.hi+'%)'}
     d.groups.forEach(function(g){var tr=document.createElement('tr');
       function cell(t){var td=document.createElement('td');td.textContent=t;tr.appendChild(td)}
-      cell(g.name);cell(g.n);
+      cell(gname(g.name));cell(g.n);
       if(g.n){cell(rt(g.h1));cell(rt(g.h2));cell((g.avg>0?'+':'')+g.avg+'%')}else{cell('-');cell('-');cell('-')}
       tb.appendChild(tr)});
     document.getElementById('bt').hidden=false;
     var g=d.groups[0],v;
-    if(g.n<30)v='Only '+g.n+' scored reports so far, too few to tell.';
-    else if(g.h1.lo>50)v='Better than a coin flip over '+d.reports+' reports.';
-    else if(g.h1.hi<50)v='Worse than a coin flip: price tended to go the other way.';
-    else v='Not clearly different from a coin flip.';
+    if(g.n<30)v='Only '+g.n+' reports with a lean so far, too few to tell.';
+    else if(g.h1.lo>50)v='Better than guessing, over '+d.reports+' reports.';
+    else if(g.h1.hi<50)v='Worse than guessing: price tended to go the other way.';
+    else v='Not clearly better than guessing.';
     document.getElementById('bt-head').textContent=v;
-    document.getElementById('bt-note').textContent='Reports from '+d.first+' to '+d.last+' ('+d.reports+' in total). Price rose in '+d.up_rate+'% of all of them in the first hour, which is the baseline to beat.';
+    document.getElementById('bt-note').textContent='Reports from '+d.first+' to '+d.last+' ('+d.reports+' in total). Price rose in '+d.up_rate+'% of all of them in the first hour, which is the number to beat.';
   }).catch(function(){})}
   loadBt();
 })();
