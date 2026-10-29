@@ -1,20 +1,25 @@
 {
  "latest": {
-  "week": "2026-10-16",
-  "released": "2026-10-22",
-  "net_change": 77,
-  "normal_change": null,
-  "surprise": null,
+  "week": "2026-10-23",
+  "released": "2026-10-29",
+  "net_change": 80,
+  "normal_change": 77,
+  "surprise": -3,
   "level_vs_normal_pct": 1.0,
-  "basis": "level",
-  "bias": "Neutral",
-  "updated_utc": "2026-10-24 18:22"
+  "basis": "weekly",
+  "bias": "Bearish",
+  "updated_utc": "2026-10-29 14:48"
  },
  "history": [
   {
    "week": "2026-10-16",
    "avg5": 3609,
    "net_change": 77
+  },
+  {
+   "week": "2026-10-23",
+   "avg5": 3686,
+   "net_change": 80
   }
  ]
 }
