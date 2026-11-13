@@ -32,6 +32,17 @@
    "m60": 0.1,
    "swing": 1.65,
    "match": true
+  },
+  {
+   "week": "2026-11-06",
+   "released": "2026-11-13",
+   "bias": "Bearish",
+   "basis": "weekly",
+   "m5": -0.4,
+   "m15": -0.22,
+   "m60": -0.37,
+   "swing": 1.23,
+   "match": true
   }
  ]
 }
