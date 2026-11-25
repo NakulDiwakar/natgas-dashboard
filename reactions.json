@@ -54,6 +54,17 @@
    "m60": -0.81,
    "swing": 2.0,
    "match": true
+  },
+  {
+   "week": "2026-11-20",
+   "released": "2026-11-25",
+   "bias": "Neutral",
+   "basis": "weekly",
+   "m5": 0.38,
+   "m15": 1.07,
+   "m60": 0.3,
+   "swing": 1.4,
+   "match": null
   }
  ]
 }

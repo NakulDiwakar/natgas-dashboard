@@ -1,14 +1,14 @@
 {
  "latest": {
-  "week": "2026-11-13",
-  "released": "2026-11-19",
-  "net_change": 20,
-  "normal_change": 15,
-  "surprise": -5,
+  "week": "2026-11-20",
+  "released": "2026-11-25",
+  "net_change": -24,
+  "normal_change": -24,
+  "surprise": 0,
   "level_vs_normal_pct": 2.1,
   "basis": "weekly",
-  "bias": "Bearish",
-  "updated_utc": "2026-11-19 22:29"
+  "bias": "Neutral",
+  "updated_utc": "2026-11-25 22:51"
  },
  "history": [
   {
@@ -35,6 +35,11 @@
    "week": "2026-11-13",
    "avg5": 3802,
    "net_change": 20
+  },
+  {
+   "week": "2026-11-20",
+   "avg5": 3778,
+   "net_change": -24
   }
  ]
 }
